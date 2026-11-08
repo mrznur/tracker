@@ -11,9 +11,7 @@ import { RadioGroupField } from '@/components/forms/fields/radio-group-field';
 import { SliderField } from '@/components/forms/fields/slider-field';
 import { ComboboxField } from '@/components/forms/fields/combobox-field';
 import { DatePickerField, DateRangeField } from '@/components/forms/fields/date-picker-field';
-import { OtpField } from '@/components/forms/fields/otp-field';
 import { ColorField } from '@/components/forms/fields/color-field';
-import { FileUploadField } from '@/components/forms/fields/file-upload-field';
 import { CheckboxGroupField } from '@/components/forms/fields/checkbox-group-field';
 import { TagsField } from '@/components/forms/fields/tags-field';
 import { ToggleGroupField } from '@/components/forms/fields/toggle-group-field';
@@ -48,9 +46,7 @@ export const { useAppForm, withForm } = createFormHook({
     ComboboxField,
     DatePickerField,
     DateRangeField,
-    OtpField,
     ColorField,
-    FileUploadField,
     CheckboxGroupField,
     TagsField,
     ToggleGroupField
