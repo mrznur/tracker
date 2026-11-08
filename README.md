@@ -1,223 +1,161 @@
-<h1 align="center">Admin Dashboard Template with Next.js &amp; Shadcn UI</h1>
+<h1 align="center">Robotics Club Equipment Lending Tracker</h1>
 
-<div align="center">Free, open source admin dashboard starter built with Next.js 16, shadcn/ui, Tailwind CSS, and TypeScript</div>
-
-<div align="center">
-  <a href="https://dub.sh/shadcn-dashboard"><strong>View Demo</strong></a>
-</div>
+<div align="center">An internal web app for managing equipment loans, members, and inventory for a university Robotics Club.</div>
 
 <br />
 
 <div align="center">
-  <img src="/public/shadcn-dashboard.png" alt="Shadcn Dashboard Cover" style="max-width: 100%; border-radius: 8px;" />
+  <img src="/public/shadcn-dashboard.png" alt="Dashboard Preview" style="max-width: 100%; border-radius: 8px;" />
 </div>
 
 <br />
-
-<p align="center">
-  <a href="https://github.com/Kiranism/next-shadcn-dashboard-starter/stargazers"><img src="https://img.shields.io/github/stars/Kiranism/next-shadcn-dashboard-starter?style=social" alt="GitHub stars" /></a>
-  <a href="https://github.com/Kiranism/next-shadcn-dashboard-starter/network/members"><img src="https://img.shields.io/github/forks/Kiranism/next-shadcn-dashboard-starter?style=social" alt="Forks" /></a>
-  <a href="https://github.com/Kiranism/next-shadcn-dashboard-starter/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Kiranism/next-shadcn-dashboard-starter" alt="MIT License" /></a>
-  <img src="https://img.shields.io/badge/Next.js-16-black" alt="Next.js" />
-</p>
 
 ## Overview
 
-A free, open source (MIT) admin dashboard starter built with Next.js 16, shadcn/ui on Base UI primitives, TypeScript, and Tailwind CSS v4.
+Built for a university Robotics Club with ~80 active members and a storage room full of equipment. Replaces a paper notebook with a proper system that tracks:
 
-Every feature is a working, production-ready implementation, not static demo UI. Tables search, filter, sort, and paginate for real. Forms validate and mutate with cache invalidation.
+- What equipment exists and where it is
+- Who has borrowed what and when it's due back
+- What's overdue and needs chasing
+- Reports for club management
 
-Clone it, strip what you don't need with the built-in cleanup script, and start building on patterns you'd write yourself. It works well as a base for SaaS apps, internal tools, and admin panels.
+Three staff roles use it: **Admin**, **Lab Assistant** (day-to-day operations), and **Executive** (read-only access).
 
-### Why This Template
+## Tech Stack
 
-Most dashboard templates are static demo boilerplates: screens that look finished but need rebuilding the moment you wire in real data. This starter takes the opposite approach:
-
-- **Everything actually works.** Data tables run end-to-end: server prefetch, client-side React Query cache, and URL-synced search, filtering, sorting, and pagination via nuqs. Forms are built from reusable, composable fields with Zod validation, including advanced patterns like multi-step and dialog/sheet forms, with real create/update mutations and cache invalidation on success.
-- **Industry-standard implementations.** The data layer follows the official TanStack Query SSR pattern (server prefetch + `HydrationBoundary` + `useSuspenseQuery`), typed end to end, organized in a feature-based structure with a clean API layer per feature. These are patterns you copy into production code as-is, not mockups you rebuild from scratch.
-- **Minimal by design.** Deliberately lean, with no bloated boilerplate, so you spend your time tweaking it to your use case, not deleting someone else's code. The built-in [cleanup script](#cleanup-script-start-minimal-in-60-seconds) strips any feature you don't need in under a minute.
-
-### Tech Stack
-
-- Framework - [Next.js 16](https://nextjs.org/16)
-- Language - [TypeScript](https://www.typescriptlang.org)
-- Error tracking - [Sentry](https://sentry.io/for/nextjs/?utm_source=github&utm_medium=paid-community&utm_campaign=general-fy26q2-nextjs&utm_content=github-banner-project-tryfree)
-- Styling - [Tailwind CSS v4](https://tailwindcss.com)
-- Components - [shadcn/ui](https://ui.shadcn.com) on [Base UI](https://base-ui.com) primitives
-- Charts - [Recharts](https://recharts.org) • [Evil Charts](https://evilcharts.com/)
-- Schema validation - [Zod](https://zod.dev)
-- Data fetching - [TanStack React Query](https://tanstack.com/query)
-- State management - [Zustand](https://zustand-demo.pmnd.rs)
-- Search param state - [Nuqs](https://nuqs.47ng.com/)
-- Tables - [TanStack Data Tables](https://ui.shadcn.com/docs/components/data-table) • [Dice Table](https://diceui.com/docs/components/data-table)
-- Forms - [TanStack Form](https://tanstack.com/form) + [Zod](https://zod.dev)
-- Command+K interface - [kbar](https://kbar.vercel.app/)
-- Linter / Formatter - [OxLint](https://oxc.rs/docs/guide/usage/linter) • [Oxfmt](https://oxc.rs/docs/guide/usage/formatter)
-- Pre-commit hooks - [Husky](https://typicode.github.io/husky/)
-- Themes - [tweakcn](https://tweakcn.com/)
-
-_Looking for a TanStack Start version? Here's the [repo](https://git.new/tanstack-start-dashboard)._
-
-## Features
-
-- Pre-built dashboard layout with sidebar, header, and content area
-- Analytics overview page with cards and charts
-- Data tables with React Query prefetch, client-side cache, search, filter, and pagination
-- Infobar component for tips, status messages, or contextual notes on any page
-- shadcn/ui components on Base UI primitives, styled with Tailwind CSS
-- Six-plus themes with a theme switcher
-- Feature-based folder structure
-- A starting point for SaaS dashboards, internal tools, and client admin panels
-
-## Use Cases
-
-A few things you can build with it:
-
-- SaaS admin dashboards
-- Internal tools and operations panels
-- Analytics dashboards
-- Client project admin panels
-- A boilerplate for new Next.js shadcn projects
+| | |
+|---|---|
+| Framework | Next.js 16 (App Router), React 19 |
+| Language | TypeScript 7 |
+| Styling | Tailwind CSS v4, shadcn/ui |
+| Database | SQLite via Prisma 6 |
+| Auth | NextAuth v5 (email + password) |
+| Forms | TanStack Form + Zod |
+| Tables | TanStack Table v9 |
+| Package manager | npm |
 
 ## Pages
 
-| Page                                                                                                                                                                  | Notes                                                                                                                                                                                |
-| :------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Dashboard Overview](https://shadcn-dashboard.kiranism.dev/dashboard)                                                                                                 | Cards and Recharts graphs. Parallel routes give each section its own loading and error state.                                                                                       |
-| [Product List (Table)](https://shadcn-dashboard.kiranism.dev/dashboard/product)                                                                                       | TanStack Table plus React Query (server prefetch, client cache) with nuqs URL state for search, filter, and pagination. `shallow: true` keeps interactions on the client.           |
-| [Create Product Form](https://shadcn-dashboard.kiranism.dev/dashboard/product/new)                                                                                    | TanStack Form and Zod with `useMutation` for create and update. Cache is invalidated on success.                                                                                    |
-| [Users (Table)](https://shadcn-dashboard.kiranism.dev/dashboard/users)                                                                                                | Same setup as Products: React Query with nuqs, server prefetch, and client-side pagination and filtering.                                                                           |
-| [Notifications](https://shadcn-dashboard.kiranism.dev/dashboard/notifications)                                                                                        | Notification center with a header badge, popover preview, and a full page with All / Unread / Read tabs. Includes mark-as-read and mark-all-as-read. |
-| [Not Found](https://shadcn-dashboard.kiranism.dev/dashboard/notfound)                                                                                                 | A root-level not-found page.                                                                                                                                                        |
-| [Global Error](https://sentry.io/for/nextjs/?utm_source=github&utm_medium=paid-community&utm_campaign=general-fy26q2-nextjs&utm_content=github-banner-project-tryfree) | A shared error page wired to Sentry for logging, reports, and session replay. |
-
-## Folder Structure
-
-```plaintext
-src/
-├── app/                           # Next.js App Router directory
-│   ├── dashboard/                 # Dashboard route group
-│   │   ├── overview/              # Analytics with parallel routes
-│   │   ├── product/               # Product CRUD pages (React Query)
-│   │   ├── users/                 # Users table (React Query + nuqs)
-│   │   ├── notifications/         # Notifications page
-│   └── api/                       # API routes
-│
-├── components/                    # Shared components
-│   ├── ui/                        # UI primitives (buttons, inputs, dialogs, etc.)
-│   ├── layout/                    # Layout components (header, sidebar, etc.)
-│   ├── themes/                    # Theme system (selector, mode toggle, config)
-│   └── kbar/                      # Command+K interface
-│
-├── features/                      # Feature-based modules
-│   ├── overview/                  # Dashboard analytics (charts, cards)
-│   ├── products/                  # Product listing, form, tables (React Query)
-│   ├── users/                     # User management table (React Query)
-│   ├── notifications/             # Notification center & store
-│
-├── lib/                           # Core utilities (query-client, searchparams, etc.)
-├── hooks/                         # Custom hooks
-├── config/                        # Navigation, infobar, data table config
-├── constants/                     # Mock data
-├── styles/                        # Global CSS & theme files
-│   └── themes/                    # Individual theme CSS files
-└── types/                         # TypeScript types
-```
+| Route | What it does |
+|---|---|
+| `/dashboard/overview` | Stat cards, items due soon, most overdue |
+| `/dashboard/equipment` | Full inventory — add, edit, bulk add |
+| `/dashboard/members` | Club members — add, edit, view loan history |
+| `/dashboard/loans` | Issue loans, record returns, extend due dates |
+| `/dashboard/overdue` | All items past their due date |
+| `/dashboard/reports` | 6 report tabs with date range filter |
+| `/dashboard/users` | Admin only — manage staff accounts |
+| `/dashboard/settings` | Change your own password |
 
 ## Getting Started
 
-> [!NOTE]
-> This starter uses Next.js 16 (App Router) with React 19 and shadcn/ui. To run it locally:
-
-Clone the repo:
-
-```
-git clone https://github.com/Kiranism/next-shadcn-dashboard-starter.git
-```
-
-- `bun install`
-- Copy the example env file: `cp env.example.txt .env.local`
-- Fill in the required variables in `.env.local`
-- `bun run dev`
-
-##### Environment variables
-
-See `env.example.txt` for the variables you need. They cover authentication and error tracking.
-
-
-The app should now be running at http://localhost:3000.
-
-> [!WARNING]
-> After cloning or forking, be careful when pulling the latest changes. Updates can cause merge conflicts.
-
----
-
-## Cleanup Script: Start Minimal in 60 Seconds
-
-Most starters make you hand-delete demo pages and rip out dependencies. This one ships with a cleanup script that removes the optional features you don't need (folders, files, dependencies, docs, and env entries), leaving a minimal base to build on. Run `--list` to see what's removable:
+**1. Install dependencies**
 
 ```bash
-bun run cleanup --interactive    # interactive mode
-bun run cleanup --list           # see available features
-bun run cleanup --dry-run chat   # preview before removing
-bun run cleanup kanban chat      # remove specific features
+npm install
 ```
 
-Run `bun run cleanup --help` for all options (with npm, pass flags after `--`: `npm run cleanup -- --list`). The replacement files it writes live in `scripts/cleanup-templates/` as real, typechecked code. When you're done, delete `scripts/cleanup.js`, `scripts/cleanup-templates/`, and the `cleanup` entry in `package.json`.
+**2. Set up environment**
 
-## FAQ
+Create `.env` at the project root:
 
-**Is it production ready?**
-Yes. Every feature is a complete, working implementation: authentication, CRUD flows, table search/filter/sort/pagination, and form validation with mutations all function end-to-end. It's a starting point for real applications, not a visual mockup.
+```env
+DATABASE_URL="file:./prisma/dev.db"
+```
 
-**How is this different from other dashboard templates?**
-Most dashboard templates are static demo boilerplates: screens that look finished but need rebuilding once you wire in real data. Here the tables, forms, auth, organizations, and billing all work end-to-end, the implementations follow official TanStack and Next.js patterns, and a cleanup script keeps the base minimal so you tweak it to your use case instead of deleting code.
+Create `.env.local` at the project root:
 
-**Is it free for commercial use?**
-Yes. MIT-licensed and free for both personal and commercial projects: no paid tier, no license keys.
+```env
+DATABASE_URL="file:./prisma/dev.db"
+AUTH_SECRET="your-random-secret-here"
+AUTH_URL="http://localhost:3000"
+APP_TIMEZONE="Asia/Dhaka"
+LOAN_DEFAULT_DAYS=7
+MEMBER_LOAN_WARN_LIMIT=5
+```
 
+Generate a secret with:
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
 
-**How do I remove demo pages or features I don't need?**
-Run `bun run cleanup --interactive` and pick what to strip, or `bun run cleanup --list` to see what can be removed.
+**3. Set up the database**
 
-**Does it support Next.js 16, React 19, and Tailwind CSS v4?**
-Yes. The template is built on Next.js 16 (App Router), React 19, and Tailwind CSS v4, with shadcn/ui on Base UI primitives, and is actively maintained to track new releases.
+```bash
+npx prisma migrate deploy
+npx tsx prisma/seed.ts
+```
 
-**Can I use npm instead of Bun?**
-Yes. Bun is preferred, but npm works too, and the repo even ships both Node.js and Bun Dockerfiles for deployment.
+**4. Start the app**
 
-**Does it work with AI coding assistants?**
-Yes. The repo ships AGENTS.md and CLAUDE.md with the project's conventions, plus a bundled Claude Code skill (`.claude/skills/kiranism-shadcn-dashboard`) that teaches agents how to add pages, tables, forms, and navigation the template way. Works with Claude Code, Cursor, and any tool that reads AGENTS.md.
+```bash
+npm run dev
+```
 
-**What data fetching pattern does it use?**
-TanStack React Query with the official SSR pattern: `queryClient.query()` prefetch on the server, `HydrationBoundary` with `dehydrate` for hydration, and `useSuspenseQuery` on the client, plus nuqs for URL-synced search-param state. Mutations invalidate the cache on success.
+Open [http://localhost:3000](http://localhost:3000)
 
-**How do I deploy it?**
-Deploy to Vercel out of the box, or use the included Docker setups: a Node.js Dockerfile and a Bun Dockerfile, both using Next.js standalone output mode. See the [deployment guide](./docs/deployment.md).
+## Default Login Credentials
 
-## Deploy
+| Email | Password | Role |
+|---|---|---|
+| `admin@robotics.club` | `admin123` | Admin |
+| `lab@robotics.club` | `admin123` | Lab Assistant |
+| `exec@robotics.club` | `admin123` | Executive |
 
-Deploy to Vercel out of the box, or use the included Docker setups: a Node.js Dockerfile and a Bun Dockerfile, both using Next.js standalone output mode. Full guide: [docs/deployment.md](./docs/deployment.md).
+> Change these after first login via the Settings page.
 
-### Support
+## Useful Commands
 
-If this template saved you some time, a star is appreciated. You can also [buy me a coffee](https://buymeacoffee.com/kiranism) if you'd like.
+```bash
+npm run dev            # start dev server
+npm run build          # production build
+npm run typecheck      # TypeScript check
+npm run format         # format with Prettier
+npx prisma studio      # browse the database visually
+npx prisma migrate dev --name <name>   # create a new migration
+```
 
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-yellow?style=flat-square&logo=buymeacoffee)](https://buymeacoffee.com/kiranism)
+## Project Structure
 
-<!--
+```
+prisma/
+├── schema.prisma       # database schema (source of truth)
+├── seed.ts             # sample data
+└── migrations/         # migration history
 
-SEO keywords:
+src/
+├── app/
+│   ├── (auth)/login/   # login page
+│   ├── actions/        # server actions (all writes go here)
+│   ├── api/            # route handlers (auth, overdue count)
+│   └── dashboard/      # all main pages
+│
+├── components/
+│   ├── ui/             # shadcn/ui components
+│   ├── layout/         # sidebar, header, page container
+│   ├── equipment/      # equipment-specific UI
+│   ├── members/        # member-specific UI
+│   ├── loans/          # loan dialogs and tables
+│   ├── overdue/        # overdue table
+│   ├── reports/        # report tabs
+│   └── icons.tsx       # all icons registered here
+│
+├── server/
+│   ├── auth.ts         # NextAuth config
+│   ├── db.ts           # Prisma client
+│   └── services/       # all database queries live here
+│
+└── lib/                # utilities, form setup, validation schemas
+```
 
-open source admin dashboard, nextjs admin dashboard, nextjs dashboard template,
+## Roles
 
-shadcn ui dashboard, admin dashboard starter, next.js 16, typescript dashboard,
+| Role | Permissions |
+|---|---|
+| `ADMIN` | Full access — manage users, delete records, everything |
+| `LAB_ASSISTANT` | Issue/return loans, add equipment and members |
+| `EXECUTIVE` | Read-only — view everything, change nothing |
 
-dashboard ui template, nextjs shadcn admin panel, react admin dashboard,
+## License
 
-tailwind css admin dashboard, production ready admin dashboard template,
-
-free react admin dashboard, nextjs 16 dashboard starter, working crud dashboard
-
--->
-
+MIT
