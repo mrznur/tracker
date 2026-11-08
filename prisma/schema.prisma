@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         String   // ADMIN | LAB_ASSISTANT | EXECUTIVE
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  loansIssued         Loan[] @relation("IssuedBy")
+  loansReceivedReturn Loan[] @relation("ReturnedTo")
+
+  @@map("users")
+}
+
+model Member {
+  id         String   @id @default(cuid())
+  studentId  String   @unique @map("student_id")
+  fullName   String   @map("full_name")
+  email      String
+  phone      String
+  department String?
+  status     String   @default("ACTIVE") // ACTIVE | INACTIVE
+  notes      String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  loans Loan[]
+
+  @@map("members")
+}
+
+model Category {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String?
+
+  equipment Equipment[]
+
+  @@map("categories")
+}
+
+model Equipment {
+  id              String    @id @default(cuid())
+  assetTag        String    @unique @map("asset_tag")
+  name            String
+  categoryId      String    @map("category_id")
+  description     String?
+  serialNumber    String?   @map("serial_number")
+  condition       String    @default("GOOD") // GOOD | FAIR | DAMAGED
+  status          String    @default("AVAILABLE") // AVAILABLE | BORROWED | DAMAGED | LOST | RETIRED
+  storageLocation String    @map("storage_location")
+  purchaseDate    DateTime? @map("purchase_date")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  category Category  @relation(fields: [categoryId], references: [id])
+  loans    Loan[]
+
+  @@index([status])
+  @@index([categoryId])
+  @@map("equipment")
+}
+
+model Loan {
+  id               String    @id @default(cuid())
+  equipmentId      String    @map("equipment_id")
+  memberId         String    @map("member_id")
+  issuedByUserId   String    @map("issued_by_user_id")
+  returnedToUserId String?   @map("returned_to_user_id")
+  borrowedAt       DateTime  @default(now()) @map("borrowed_at")
+  dueDate          DateTime  @map("due_date")
+  returnedAt       DateTime? @map("returned_at")
+  returnCondition  String?   @map("return_condition") // GOOD | FAIR | DAMAGED | LOST
+  purpose          String
+  notes            String?
+
+  equipment  Equipment @relation(fields: [equipmentId], references: [id])
+  member     Member    @relation(fields: [memberId], references: [id])
+  issuedBy   User      @relation("IssuedBy", fields: [issuedByUserId], references: [id])
+  returnedTo User?     @relation("ReturnedTo", fields: [returnedToUserId], references: [id])
+
+  @@index([equipmentId])
+  @@index([memberId])
+  @@index([returnedAt])
+  @@index([dueDate])
+  @@map("loans")
+}
