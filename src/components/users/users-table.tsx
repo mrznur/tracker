@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
+import { KeyRound, UserCog, UserCheck, UserX } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -154,7 +155,7 @@ export function UsersTable({ users }: UsersTableProps) {
               <TableHead>Role</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Created</TableHead>
-              <TableHead className='w-40'>Actions</TableHead>
+              <TableHead className='w-72'>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -177,28 +178,9 @@ export function UsersTable({ users }: UsersTableProps) {
                   </TableCell>
                   <TableCell className='text-sm'>{formatDate(user.createdAt)}</TableCell>
                   <TableCell>
-                    <div className='flex gap-1'>
+                    <div className='flex items-center gap-2'>
                       <Button
-                        variant='ghost'
-                        size='xs'
-                        onClick={() => handleToggleActive(user)}
-                        aria-label={user.isActive ? 'Deactivate user' : 'Activate user'}
-                      >
-                        {user.isActive ? 'Deactivate' : 'Activate'}
-                      </Button>
-                      <Button
-                        variant='ghost'
-                        size='xs'
-                        onClick={() => {
-                          setResetUser(user);
-                          setNewPassword(generatePassword());
-                          setResetDone(false);
-                        }}
-                      >
-                        Reset PW
-                      </Button>
-                      <Button
-                        variant='ghost'
+                        variant='outline'
                         size='xs'
                         onClick={() => {
                           setRoleUser(user);
@@ -206,7 +188,38 @@ export function UsersTable({ users }: UsersTableProps) {
                           setRoleError(null);
                         }}
                       >
+                        <UserCog className='size-3.5' />
                         Role
+                      </Button>
+                      <Button
+                        variant='outline'
+                        size='xs'
+                        onClick={() => {
+                          setResetUser(user);
+                          setNewPassword(generatePassword());
+                          setResetDone(false);
+                        }}
+                      >
+                        <KeyRound className='size-3.5' />
+                        Reset PW
+                      </Button>
+                      <Button
+                        variant='outline'
+                        size='xs'
+                        onClick={() => handleToggleActive(user)}
+                        aria-label={user.isActive ? 'Deactivate user' : 'Activate user'}
+                        className={
+                          user.isActive
+                            ? 'text-destructive hover:text-destructive hover:bg-destructive/10'
+                            : 'text-emerald-600 hover:text-emerald-600 hover:bg-emerald-500/10 dark:text-emerald-400'
+                        }
+                      >
+                        {user.isActive ? (
+                          <UserX className='size-3.5' />
+                        ) : (
+                          <UserCheck className='size-3.5' />
+                        )}
+                        {user.isActive ? 'Deactivate' : 'Activate'}
                       </Button>
                     </div>
                   </TableCell>

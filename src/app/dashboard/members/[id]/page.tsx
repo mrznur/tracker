@@ -95,7 +95,7 @@ export default async function MemberDetailPage({ params }: PageProps) {
       pageTitle={m.fullName}
       pageDescription={m.studentId}
       pageHeaderAction={
-        <Button variant='outline' render={<Link href='/dashboard/members' />}>
+        <Button variant='outline' nativeButton={false} render={<Link href='/dashboard/members' />}>
           <Icons.chevronLeft className='size-4 mr-1' />
           Back to Members
         </Button>

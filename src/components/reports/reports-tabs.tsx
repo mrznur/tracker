@@ -2,10 +2,10 @@
 
 import * as React from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { DateRangePicker, type DateRange } from '@/components/ui/date-range-picker';
-import { StatusBadge, ConditionBadge } from '@/components/ui/status-badge';
+import { StatusBadge, ConditionBadge, LoanStatusBadge } from '@/components/ui/status-badge';
 import {
   Table,
   TableBody,
@@ -15,6 +15,7 @@ import {
   TableRow
 } from '@/components/ui/table';
 import { Icons } from '@/components/icons';
+import { cn } from '@/lib/utils';
 
 // ---- Types ----
 
@@ -119,12 +120,42 @@ function downloadCSV(filename: string, rows: string[][], headers: string[]) {
 // ---- Component ----
 
 const TABS = [
-  { value: 'borrowed', label: 'Currently Borrowed' },
-  { value: 'overdue', label: 'Overdue' },
-  { value: 'lost-damaged', label: 'Lost / Damaged' },
-  { value: 'most-borrowed', label: 'Most Borrowed' },
-  { value: 'by-member', label: 'Loans by Member' },
-  { value: 'never-borrowed', label: 'Never Borrowed' }
+  {
+    value: 'borrowed',
+    label: 'Currently Borrowed',
+    bar: 'bg-amber-500',
+    chip: 'bg-amber-500/15 text-amber-700 dark:text-amber-400'
+  },
+  {
+    value: 'overdue',
+    label: 'Overdue',
+    bar: 'bg-red-500',
+    chip: 'bg-red-500/15 text-red-700 dark:text-red-400'
+  },
+  {
+    value: 'lost-damaged',
+    label: 'Lost / Damaged',
+    bar: 'bg-orange-500',
+    chip: 'bg-orange-500/15 text-orange-700 dark:text-orange-400'
+  },
+  {
+    value: 'most-borrowed',
+    label: 'Most Borrowed',
+    bar: 'bg-blue-500',
+    chip: 'bg-blue-500/15 text-blue-700 dark:text-blue-400'
+  },
+  {
+    value: 'by-member',
+    label: 'Loans by Member',
+    bar: 'bg-indigo-500',
+    chip: 'bg-indigo-500/15 text-indigo-700 dark:text-indigo-400'
+  },
+  {
+    value: 'never-borrowed',
+    label: 'Never Borrowed',
+    bar: 'bg-gray-400',
+    chip: 'bg-gray-500/15 text-gray-700 dark:text-gray-400'
+  }
 ];
 
 export function ReportsTabs({
@@ -143,16 +174,12 @@ export function ReportsTabs({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const tabLabels: Record<string, string> = {
-    borrowed: `Currently Borrowed (${counts.borrowed})`,
-    overdue: `Overdue (${counts.overdue})`,
-    'lost-damaged': `Lost / Damaged (${counts.lostDamaged})`,
-    'most-borrowed': 'Most Borrowed',
-    'by-member': 'Loans by Member',
-    'never-borrowed': `Never Borrowed (${counts.neverBorrowed})`
+  const tabCounts: Record<string, number | undefined> = {
+    borrowed: counts.borrowed,
+    overdue: counts.overdue,
+    'lost-damaged': counts.lostDamaged,
+    'never-borrowed': counts.neverBorrowed
   };
-
-  const TABS_WITH_COUNTS = TABS.map((t) => ({ ...t, label: tabLabels[t.value] ?? t.label }));
 
   function setTab(value: string) {
     const params = new URLSearchParams(searchParams.toString());
@@ -284,23 +311,73 @@ export function ReportsTabs({
     );
   }
 
+  function onTabKeyDown(e: React.KeyboardEvent, index: number) {
+    const dir = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+    if (!dir && e.key !== 'Home' && e.key !== 'End') return;
+    e.preventDefault();
+    const next =
+      e.key === 'Home' ? 0 : e.key === 'End' ? TABS.length - 1 : (index + dir + TABS.length) % TABS.length;
+    setTab(TABS[next].value);
+    document.getElementById(`report-tab-${TABS[next].value}`)?.focus();
+  }
+
   const needsDateRange = tab === 'most-borrowed' || tab === 'by-member';
 
   return (
     <div className='flex flex-col gap-4'>
       <Tabs value={tab} onValueChange={setTab}>
-        <div className='flex flex-wrap items-center gap-3'>
-          <TabsList className='h-auto flex-wrap'>
-            {TABS_WITH_COUNTS.map((t) => (
-              <TabsTrigger key={t.value} value={t.value}>
-                {t.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+        <div role='tablist' aria-label='Reports' className='flex flex-wrap gap-2'>
+          {TABS.map((t, i) => {
+            const active = tab === t.value;
+            const count = tabCounts[t.value];
+            return (
+              <button
+                key={t.value}
+                id={`report-tab-${t.value}`}
+                type='button'
+                role='tab'
+                aria-selected={active}
+                tabIndex={active ? 0 : -1}
+                onClick={() => setTab(t.value)}
+                onKeyDown={(e) => onTabKeyDown(e, i)}
+                className={cn(
+                  'group relative flex items-center gap-3 overflow-hidden rounded-lg border py-2 pr-4 pl-4 text-left transition-all duration-150 outline-none motion-reduce:transition-none',
+                  'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                  active
+                    ? 'border-foreground/30 bg-foreground/[0.06] shadow-sm'
+                    : 'bg-card hover:-translate-y-px hover:border-foreground/25 hover:bg-muted/50 hover:shadow-sm active:translate-y-0'
+                )}
+              >
+                <span
+                  className={cn(
+                    'absolute inset-y-0 left-0 transition-all duration-150',
+                    t.bar,
+                    active ? 'w-1.5' : 'w-1 group-hover:w-1.5'
+                  )}
+                />
+                <span
+                  className={cn(
+                    'flex h-8 min-w-8 items-center justify-center rounded-md px-1.5 font-mono text-sm font-semibold tabular-nums transition-colors',
+                    t.chip
+                  )}
+                >
+                  {count ?? '→'}
+                </span>
+                <span
+                  className={cn(
+                    'text-sm font-medium whitespace-nowrap transition-colors',
+                    active ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'
+                  )}
+                >
+                  {t.label}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         {needsDateRange && (
-          <div className='mt-2'>
+          <div className='mt-4'>
             <DateRangePicker value={{ from, to }} onChange={setDateRange} />
           </div>
         )}
@@ -535,7 +612,7 @@ export function ReportsTabs({
                   <TableHead>Item</TableHead>
                   <TableHead>Borrowed</TableHead>
                   <TableHead>Due</TableHead>
-                  <TableHead>Returned</TableHead>
+                  <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -554,11 +631,18 @@ export function ReportsTabs({
                       <TableCell>{loan.equipment.name}</TableCell>
                       <TableCell className='text-sm'>{formatDate(loan.borrowedAt)}</TableCell>
                       <TableCell className='text-sm'>{formatDate(loan.dueDate)}</TableCell>
-                      <TableCell className='text-sm'>
+                      <TableCell>
                         {loan.returnedAt ? (
-                          formatDate(loan.returnedAt)
+                          <div className='flex items-center gap-2'>
+                            <LoanStatusBadge status='RETURNED' />
+                            <span className='text-xs text-muted-foreground'>
+                              {formatDate(loan.returnedAt)}
+                            </span>
+                          </div>
                         ) : (
-                          <span className='text-amber-600 text-xs font-medium'>Active</span>
+                          <LoanStatusBadge
+                            status={new Date(loan.dueDate) < new Date() ? 'OVERDUE' : 'ACTIVE'}
+                          />
                         )}
                       </TableCell>
                     </TableRow>

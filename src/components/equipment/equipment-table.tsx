@@ -133,11 +133,15 @@ export function EquipmentTable({
         </form>
 
         <Select
-          value={categoryFilter}
-          onValueChange={(v) => updateParam('categoryId', (v ?? '') === 'all' ? '' : (v ?? ''))}
+          value={categoryFilter || 'all'}
+          onValueChange={(v) => updateParam('categoryId', v === 'all' ? '' : (v ?? ''))}
         >
           <SelectTrigger className='w-40'>
-            <SelectValue placeholder='All Categories' />
+            <SelectValue>
+              {categoryFilter
+                ? (categories.find((c) => c.id === categoryFilter)?.name ?? 'All Categories')
+                : 'All Categories'}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value='all'>All Categories</SelectItem>
@@ -150,11 +154,15 @@ export function EquipmentTable({
         </Select>
 
         <Select
-          value={statusFilter}
-          onValueChange={(v) => updateParam('status', (v ?? '') === 'all' ? '' : (v ?? ''))}
+          value={statusFilter || 'all'}
+          onValueChange={(v) => updateParam('status', v === 'all' ? '' : (v ?? ''))}
         >
           <SelectTrigger className='w-36'>
-            <SelectValue placeholder='All Status' />
+            <SelectValue>
+              {statusFilter
+                ? { AVAILABLE: 'Available', BORROWED: 'Borrowed', DAMAGED: 'Damaged', LOST: 'Lost', RETIRED: 'Retired' }[statusFilter] ?? 'All Status'
+                : 'All Status'}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value='all'>All Status</SelectItem>
@@ -167,11 +175,15 @@ export function EquipmentTable({
         </Select>
 
         <Select
-          value={conditionFilter}
-          onValueChange={(v) => updateParam('condition', (v ?? '') === 'all' ? '' : (v ?? ''))}
+          value={conditionFilter || 'all'}
+          onValueChange={(v) => updateParam('condition', v === 'all' ? '' : (v ?? ''))}
         >
           <SelectTrigger className='w-36'>
-            <SelectValue placeholder='All Condition' />
+            <SelectValue>
+              {conditionFilter
+                ? { GOOD: 'Good', FAIR: 'Fair', DAMAGED: 'Damaged' }[conditionFilter] ?? 'All Condition'
+                : 'All Condition'}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value='all'>All Condition</SelectItem>

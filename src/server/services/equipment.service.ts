@@ -52,9 +52,9 @@ export async function getEquipmentList(
   if (params.search && params.search.trim()) {
     const term = params.search.trim();
     where.OR = [
-      { name: { contains: term, mode: 'insensitive' } },
-      { assetTag: { contains: term, mode: 'insensitive' } },
-      { serialNumber: { contains: term, mode: 'insensitive' } }
+      { name: { contains: term } },
+      { assetTag: { contains: term } },
+      { serialNumber: { contains: term } }
     ];
   }
 

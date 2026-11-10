@@ -4,44 +4,75 @@ type EquipmentStatus = 'AVAILABLE' | 'BORROWED' | 'DAMAGED' | 'LOST' | 'RETIRED'
 type EquipmentCondition = 'GOOD' | 'FAIR' | 'DAMAGED';
 type LoanStatus = 'ACTIVE' | 'OVERDUE' | 'RETURNED';
 type MemberStatus = 'ACTIVE' | 'INACTIVE';
+type Role = 'ADMIN' | 'LAB_ASSISTANT' | 'EXECUTIVE';
 
-const statusColors: Record<EquipmentStatus, string> = {
-  AVAILABLE:
-    'bg-green-100 text-green-800 border border-green-300 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700',
-  BORROWED:
-    'bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700',
-  DAMAGED:
-    'bg-orange-100 text-orange-800 border border-orange-300 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-700',
-  LOST: 'bg-red-100 text-red-800 border border-red-300 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700',
-  RETIRED:
-    'bg-gray-100 text-gray-600 border border-gray-300 dark:bg-gray-800/50 dark:text-gray-400 dark:border-gray-600'
+const statusBar: Record<EquipmentStatus, string> = {
+  AVAILABLE: 'bg-emerald-500',
+  BORROWED: 'bg-amber-500',
+  DAMAGED: 'bg-red-400',
+  LOST: 'bg-red-500',
+  RETIRED: 'bg-gray-400'
 };
 
-const conditionColors: Record<EquipmentCondition, string> = {
-  GOOD: 'bg-green-100 text-green-800 border border-green-300 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700',
-  FAIR: 'bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700',
-  DAMAGED:
-    'bg-orange-100 text-orange-800 border border-orange-300 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-700'
+const conditionBar: Record<EquipmentCondition, string> = {
+  GOOD: 'bg-emerald-500',
+  FAIR: 'bg-sky-500',
+  DAMAGED: 'bg-red-400'
 };
 
-const loanStatusColors: Record<LoanStatus, string> = {
-  ACTIVE:
-    'bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700',
-  OVERDUE:
-    'bg-red-100 text-red-800 border border-red-300 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700',
-  RETURNED:
-    'bg-gray-100 text-gray-600 border border-gray-300 dark:bg-gray-800/50 dark:text-gray-400 dark:border-gray-600'
+const loanStatusBar: Record<LoanStatus, string> = {
+  ACTIVE: 'bg-blue-500',
+  OVERDUE: 'bg-red-500',
+  RETURNED: 'bg-gray-400'
 };
 
-const memberStatusColors: Record<MemberStatus, string> = {
-  ACTIVE:
-    'bg-green-100 text-green-800 border border-green-300 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700',
-  INACTIVE:
-    'bg-gray-100 text-gray-600 border border-gray-300 dark:bg-gray-800/50 dark:text-gray-400 dark:border-gray-600'
+const memberStatusBar: Record<MemberStatus, string> = {
+  ACTIVE: 'bg-emerald-500',
+  INACTIVE: 'bg-gray-400'
 };
 
-const baseClass =
-  'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap';
+const roleBar: Record<Role, string> = {
+  ADMIN: 'bg-purple-500',
+  LAB_ASSISTANT: 'bg-blue-500',
+  EXECUTIVE: 'bg-indigo-500'
+};
+
+const roleLabels: Record<Role, string> = {
+  ADMIN: 'Admin',
+  LAB_ASSISTANT: 'Lab Assistant',
+  EXECUTIVE: 'Executive'
+};
+
+/**
+ * Inventory-label style tag: monospace, uppercase, square corners,
+ * with a solid colored bar on the left edge (like a shelf label).
+ * Used by every badge in this file so they all look consistent.
+ */
+function Tag({
+  label,
+  barClass,
+  muted = false,
+  className
+}: {
+  label: string;
+  barClass: string;
+  muted?: boolean;
+  className?: string;
+}) {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-stretch overflow-hidden rounded-[3px] border bg-muted/40 font-mono text-[11px] font-semibold tracking-wider whitespace-nowrap uppercase',
+        className
+      )}
+    >
+      <span className={cn('w-1 shrink-0', barClass)} />
+      <span className={cn('px-2 py-0.5', muted ? 'text-muted-foreground' : 'text-foreground/80')}>
+        {label}
+      </span>
+    </span>
+  );
+}
 
 export function StatusBadge({
   status,
@@ -51,9 +82,12 @@ export function StatusBadge({
   className?: string;
 }) {
   return (
-    <span className={cn(baseClass, statusColors[status], className)}>
-      {status.charAt(0) + status.slice(1).toLowerCase()}
-    </span>
+    <Tag
+      label={status}
+      barClass={statusBar[status]}
+      muted={status === 'RETIRED'}
+      className={className}
+    />
   );
 }
 
@@ -64,18 +98,17 @@ export function ConditionBadge({
   condition: EquipmentCondition;
   className?: string;
 }) {
-  return (
-    <span className={cn(baseClass, conditionColors[condition], className)}>
-      {condition.charAt(0) + condition.slice(1).toLowerCase()}
-    </span>
-  );
+  return <Tag label={condition} barClass={conditionBar[condition]} className={className} />;
 }
 
 export function LoanStatusBadge({ status, className }: { status: LoanStatus; className?: string }) {
   return (
-    <span className={cn(baseClass, loanStatusColors[status], className)}>
-      {status.charAt(0) + status.slice(1).toLowerCase()}
-    </span>
+    <Tag
+      label={status}
+      barClass={loanStatusBar[status]}
+      muted={status === 'RETURNED'}
+      className={className}
+    />
   );
 }
 
@@ -87,28 +120,15 @@ export function MemberStatusBadge({
   className?: string;
 }) {
   return (
-    <span className={cn(baseClass, memberStatusColors[status], className)}>
-      {status.charAt(0) + status.slice(1).toLowerCase()}
-    </span>
+    <Tag
+      label={status}
+      barClass={memberStatusBar[status]}
+      muted={status === 'INACTIVE'}
+      className={className}
+    />
   );
 }
 
-export function RoleBadge({
-  role,
-  className
-}: {
-  role: 'ADMIN' | 'LAB_ASSISTANT' | 'EXECUTIVE';
-  className?: string;
-}) {
-  const roleColors = {
-    ADMIN: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-    LAB_ASSISTANT: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-    EXECUTIVE: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400'
-  };
-  const roleLabels = {
-    ADMIN: 'Admin',
-    LAB_ASSISTANT: 'Lab Assistant',
-    EXECUTIVE: 'Executive'
-  };
-  return <span className={cn(baseClass, roleColors[role], className)}>{roleLabels[role]}</span>;
+export function RoleBadge({ role, className }: { role: Role; className?: string }) {
+  return <Tag label={roleLabels[role]} barClass={roleBar[role]} className={className} />;
 }

@@ -83,7 +83,7 @@ export default async function EquipmentDetailPage({ params }: PageProps) {
       pageTitle={eq.name}
       pageDescription={eq.assetTag}
       pageHeaderAction={
-        <Button variant='outline' render={<Link href='/dashboard/equipment' />}>
+        <Button variant='outline' nativeButton={false} render={<Link href='/dashboard/equipment' />}>
           <Icons.chevronLeft className='size-4 mr-1' />
           Back to Equipment
         </Button>

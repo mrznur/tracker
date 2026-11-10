@@ -43,9 +43,9 @@ export async function getMemberList(params: MemberListParams = {}): Promise<Memb
   if (params.search && params.search.trim()) {
     const term = params.search.trim();
     where.OR = [
-      { fullName: { contains: term, mode: 'insensitive' } },
-      { studentId: { contains: term, mode: 'insensitive' } },
-      { email: { contains: term, mode: 'insensitive' } }
+      { fullName: { contains: term } },
+      { studentId: { contains: term } },
+      { email: { contains: term } }
     ];
   }
 
