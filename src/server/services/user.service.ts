@@ -40,7 +40,7 @@ export async function createUser(input: CreateUserInput): Promise<UserRow> {
     throw new Error(`A user with email "${input.email}" already exists.`);
   }
 
-  const passwordHash = await bcrypt.hash(input.password, 12);
+  const passwordHash = await bcrypt.hash(input.password, 10);
 
   return prisma.user.create({
     data: {
@@ -80,7 +80,7 @@ export async function resetPassword(id: string, newPassword: string): Promise<vo
   const existing = await prisma.user.findUnique({ where: { id } });
   if (!existing) throw new Error('User not found.');
 
-  const passwordHash = await bcrypt.hash(newPassword, 12);
+  const passwordHash = await bcrypt.hash(newPassword, 10);
   await prisma.user.update({ where: { id }, data: { passwordHash } });
 }
 
@@ -95,7 +95,7 @@ export async function changePassword(
   const valid = await bcrypt.compare(currentPassword, user.passwordHash);
   if (!valid) throw new Error('Current password is incorrect.');
 
-  const passwordHash = await bcrypt.hash(newPassword, 12);
+  const passwordHash = await bcrypt.hash(newPassword, 10);
   await prisma.user.update({ where: { id }, data: { passwordHash } });
 }
 
