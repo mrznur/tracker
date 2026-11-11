@@ -1,22 +1,7 @@
 import { prisma } from '@/server/db';
 import { getTodayInAppTimezone, overdueWhereClause } from '@/server/timezone';
 
-export type DateRangeParams = {
-  from?: Date;
-  to?: Date;
-};
-
-export type MostBorrowedParams = DateRangeParams & {
-  limit?: number;
-};
-
-export type LoansByMemberParams = DateRangeParams & {
-  memberId?: string;
-  page?: number;
-  pageSize?: number;
-};
-
-export async function getCurrentlyBorrowed(): Promise<object[]> {
+export async function getCurrentlyBorrowed() {
   const loans = await prisma.loan.findMany({
     where: { returnedAt: null },
     orderBy: { dueDate: 'asc' },
@@ -29,17 +14,12 @@ export async function getCurrentlyBorrowed(): Promise<object[]> {
 
   const today = getTodayInAppTimezone();
 
-  return loans.map((loan) => ({
-    ...loan,
-    isOverdue: loan.dueDate < today
-  }));
+  return loans.map((loan) => ({ ...loan, isOverdue: loan.dueDate < today }));
 }
 
-export async function getOverdueReport(): Promise<object[]> {
-  const overdue = overdueWhereClause();
-
+export async function getOverdueReport() {
   const loans = await prisma.loan.findMany({
-    where: overdue,
+    where: overdueWhereClause(),
     orderBy: { dueDate: 'asc' },
     include: {
       equipment: { include: { category: true } },
@@ -58,11 +38,9 @@ export async function getOverdueReport(): Promise<object[]> {
     .sort((a, b) => b.daysLate - a.daysLate);
 }
 
-export async function getLostOrDamagedEquipment(): Promise<object[]> {
-  const equipment = await prisma.equipment.findMany({
-    where: {
-      status: { in: ['DAMAGED', 'LOST'] }
-    },
+export async function getLostOrDamagedEquipment() {
+  return prisma.equipment.findMany({
+    where: { status: { in: ['DAMAGED', 'LOST'] } },
     orderBy: [{ status: 'asc' }, { name: 'asc' }],
     include: {
       category: true,
@@ -75,21 +53,22 @@ export async function getLostOrDamagedEquipment(): Promise<object[]> {
       }
     }
   });
-
-  return equipment;
 }
 
-export async function getMostBorrowedItems(params: MostBorrowedParams = {}): Promise<object[]> {
+export async function getMostBorrowedItems(params: {
+  from?: Date;
+  to?: Date;
+  limit?: number;
+} = {}) {
   const limit = params.limit ?? 10;
+  const loanWhere: Record<string, unknown> = {};
+  if (params.from || params.to) {
+    const dateFilter: Record<string, unknown> = {};
+    if (params.from) dateFilter.gte = params.from;
+    if (params.to) dateFilter.lte = params.to;
+    loanWhere.borrowedAt = dateFilter;
+  }
 
-  const dateFilter: Record<string, unknown> = {};
-  if (params.from) dateFilter.gte = params.from;
-  if (params.to) dateFilter.lte = params.to;
-
-  const loanWhere: Record<string, unknown> =
-    Object.keys(dateFilter).length > 0 ? { borrowedAt: dateFilter } : {};
-
-  // Aggregate loan counts per equipment
   const loanCounts = await prisma.loan.groupBy({
     by: ['equipmentId'],
     where: loanWhere,
@@ -100,14 +79,11 @@ export async function getMostBorrowedItems(params: MostBorrowedParams = {}): Pro
 
   if (loanCounts.length === 0) return [];
 
-  const equipmentIds = loanCounts.map((r) => r.equipmentId);
-
   const equipment = await prisma.equipment.findMany({
-    where: { id: { in: equipmentIds } },
+    where: { id: { in: loanCounts.map((r) => r.equipmentId) } },
     include: { category: true }
   });
 
-  // Merge counts with equipment data
   const countMap = new Map(loanCounts.map((r) => [r.equipmentId, r._count.id]));
 
   return equipment
@@ -115,20 +91,20 @@ export async function getMostBorrowedItems(params: MostBorrowedParams = {}): Pro
     .sort((a, b) => b.totalLoans - a.totalLoans);
 }
 
-export async function getLoansByMember(
-  params: LoansByMemberParams = {}
-): Promise<{ items: object[]; total: number; page: number; pageSize: number }> {
+export async function getLoansByMember(params: {
+  from?: Date;
+  to?: Date;
+  memberId?: string;
+  page?: number;
+  pageSize?: number;
+} = {}) {
   const page = Math.max(1, params.page ?? 1);
-  const pageSize = Math.min(100, Math.max(1, params.pageSize ?? 20));
+  const pageSize = Math.min(100, params.pageSize ?? 20);
   const skip = (page - 1) * pageSize;
 
   const where: Record<string, unknown> = {};
-
-  if (params.memberId) {
-    where.memberId = params.memberId;
-  }
-
-  if (params.from ?? params.to) {
+  if (params.memberId) where.memberId = params.memberId;
+  if (params.from || params.to) {
     const dateFilter: Record<string, unknown> = {};
     if (params.from) dateFilter.gte = params.from;
     if (params.to) dateFilter.lte = params.to;
@@ -154,14 +130,10 @@ export async function getLoansByMember(
   return { items: loans, total, page, pageSize };
 }
 
-export async function getNeverBorrowedItems(): Promise<object[]> {
-  const equipment = await prisma.equipment.findMany({
-    where: {
-      loans: { none: {} }
-    },
+export async function getNeverBorrowedItems() {
+  return prisma.equipment.findMany({
+    where: { loans: { none: {} } },
     orderBy: { assetTag: 'asc' },
     include: { category: true }
   });
-
-  return equipment;
 }

@@ -1,21 +1,4 @@
 import { prisma } from '@/server/db';
-import { overdueWhereClause } from '@/server/timezone';
-
-export type EquipmentListParams = {
-  page?: number;
-  pageSize?: number;
-  search?: string;
-  categoryId?: string;
-  status?: string;
-  condition?: string;
-};
-
-export type EquipmentListResult = {
-  items: object[];
-  total: number;
-  page: number;
-  pageSize: number;
-};
 
 export type CreateEquipmentInput = {
   name: string;
@@ -40,16 +23,21 @@ export type UpdateEquipmentInput = Partial<{
   notes: string;
 }>;
 
-export async function getEquipmentList(
-  params: EquipmentListParams = {}
-): Promise<EquipmentListResult> {
+export async function getEquipmentList(params: {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  categoryId?: string;
+  status?: string;
+  condition?: string;
+} = {}) {
   const page = Math.max(1, params.page ?? 1);
   const pageSize = Math.min(100, Math.max(1, params.pageSize ?? 20));
   const skip = (page - 1) * pageSize;
 
   const where: Record<string, unknown> = {};
 
-  if (params.search && params.search.trim()) {
+  if (params.search?.trim()) {
     const term = params.search.trim();
     where.OR = [
       { name: { contains: term } },
@@ -58,17 +46,9 @@ export async function getEquipmentList(
     ];
   }
 
-  if (params.categoryId) {
-    where.categoryId = params.categoryId;
-  }
-
-  if (params.status) {
-    where.status = params.status;
-  }
-
-  if (params.condition) {
-    where.condition = params.condition;
-  }
+  if (params.categoryId) where.categoryId = params.categoryId;
+  if (params.status) where.status = params.status;
+  if (params.condition) where.condition = params.condition;
 
   const [items, total] = await prisma.$transaction([
     prisma.equipment.findMany({
@@ -91,7 +71,7 @@ export async function getEquipmentList(
   return { items, total, page, pageSize };
 }
 
-export async function getEquipmentById(id: string): Promise<object | null> {
+export async function getEquipmentById(id: string) {
   const equipment = await prisma.equipment.findUnique({
     where: { id },
     include: {
@@ -122,9 +102,9 @@ export async function getEquipmentById(id: string): Promise<object | null> {
   return { ...equipment, loanHistory };
 }
 
-export async function getNextAssetTag(): Promise<string> {
+// Finds the next available RC-XXXX asset tag inside a transaction
+async function getNextAssetTag(): Promise<string> {
   return prisma.$transaction(async (tx) => {
-    // Find the highest existing RC-XXXX tag
     const latest = await tx.equipment.findFirst({
       where: { assetTag: { startsWith: 'RC-' } },
       orderBy: { assetTag: 'desc' },
@@ -134,19 +114,17 @@ export async function getNextAssetTag(): Promise<string> {
     let nextNum = 1;
     if (latest) {
       const match = /^RC-(\d+)$/.exec(latest.assetTag);
-      if (match?.[1]) {
-        nextNum = parseInt(match[1], 10) + 1;
-      }
+      if (match?.[1]) nextNum = parseInt(match[1], 10) + 1;
     }
 
     return `RC-${String(nextNum).padStart(4, '0')}`;
   });
 }
 
-export async function createEquipment(input: CreateEquipmentInput): Promise<object> {
+export async function createEquipment(input: CreateEquipmentInput) {
   const assetTag = await getNextAssetTag();
 
-  const equipment = await prisma.equipment.create({
+  return prisma.equipment.create({
     data: {
       assetTag,
       name: input.name.trim(),
@@ -160,24 +138,19 @@ export async function createEquipment(input: CreateEquipmentInput): Promise<obje
     },
     include: { category: true }
   });
-
-  return equipment;
 }
 
-export async function bulkCreateEquipment(
-  input: CreateEquipmentInput & { quantity: number }
-): Promise<object[]> {
+export async function bulkCreateEquipment(input: CreateEquipmentInput & { quantity: number }) {
   const { quantity, ...common } = input;
 
   if (quantity < 1 || quantity > 100) {
     throw new Error('Quantity must be between 1 and 100.');
   }
 
-  const created: object[] = [];
+  const created: Awaited<ReturnType<typeof prisma.equipment.create>>[] = [];
 
-  // Generate tags sequentially inside a transaction to avoid duplicates
+  // All tags generated sequentially in one transaction — no duplicate tags possible
   await prisma.$transaction(async (tx) => {
-    // Find current max tag
     const latest = await tx.equipment.findFirst({
       where: { assetTag: { startsWith: 'RC-' } },
       orderBy: { assetTag: 'desc' },
@@ -187,14 +160,12 @@ export async function bulkCreateEquipment(
     let nextNum = 1;
     if (latest) {
       const match = /^RC-(\d+)$/.exec(latest.assetTag);
-      if (match?.[1]) {
-        nextNum = parseInt(match[1], 10) + 1;
-      }
+      if (match?.[1]) nextNum = parseInt(match[1], 10) + 1;
     }
 
     for (let i = 0; i < quantity; i++) {
       const assetTag = `RC-${String(nextNum + i).padStart(4, '0')}`;
-      const equipment = await tx.equipment.create({
+      const item = await tx.equipment.create({
         data: {
           assetTag,
           name: common.name.trim(),
@@ -202,33 +173,28 @@ export async function bulkCreateEquipment(
           description: common.description?.trim() ?? null,
           serialNumber: common.serialNumber?.trim() ?? null,
           condition: common.condition ?? 'GOOD',
-          status: common.status ?? 'AVAILABLE',
+          status: 'AVAILABLE',
           storageLocation: common.storageLocation.trim(),
           purchaseDate: common.purchaseDate ?? null
         },
         include: { category: true }
       });
-      created.push(equipment);
+      created.push(item);
     }
   });
 
   return created;
 }
 
-export async function updateEquipment(id: string, input: UpdateEquipmentInput): Promise<object> {
+export async function updateEquipment(id: string, input: UpdateEquipmentInput) {
   const existing = await prisma.equipment.findUnique({ where: { id } });
-  if (!existing) {
-    throw new Error('Equipment not found.');
-  }
+  if (!existing) throw new Error('Equipment not found.');
 
-  // RETIRED items cannot be changed to BORROWED
   if (existing.status === 'RETIRED' && input.status === 'BORROWED') {
     throw new Error('Retired items cannot be set to borrowed status.');
   }
 
-  // Build update data — store note for DAMAGED -> AVAILABLE transitions
   const data: Record<string, unknown> = {};
-
   if (input.name !== undefined) data.name = input.name.trim();
   if (input.categoryId !== undefined) data.categoryId = input.categoryId;
   if (input.description !== undefined) data.description = input.description.trim();
@@ -236,27 +202,11 @@ export async function updateEquipment(id: string, input: UpdateEquipmentInput): 
   if (input.condition !== undefined) data.condition = input.condition;
   if (input.storageLocation !== undefined) data.storageLocation = input.storageLocation.trim();
   if (input.purchaseDate !== undefined) data.purchaseDate = input.purchaseDate;
+  if (input.status !== undefined) data.status = input.status;
 
-  if (input.status !== undefined) {
-    data.status = input.status;
-
-    // If repairing DAMAGED -> AVAILABLE, append a note
-    if (existing.status === 'DAMAGED' && input.status === 'AVAILABLE' && input.notes) {
-      const repairNote = `Repaired/restored to available: ${input.notes.trim()}`;
-      // We don't have a notes field on equipment, so we keep this as a no-op note annotation
-      // The note will be visible through loan history and audit trail
-      void repairNote; // acknowledged; equipment has no notes column — stored via service log only
-    }
-  }
-
-  const updated = await prisma.equipment.update({
+  return prisma.equipment.update({
     where: { id },
     data,
     include: { category: true }
   });
-
-  return updated;
 }
-
-// Helper re-export for use in other services
-export { overdueWhereClause };

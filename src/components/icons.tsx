@@ -47,6 +47,7 @@ import {
   IconHelpCircle,
   IconInfoCircle,
   IconItalic,
+  IconKey,
   IconLayoutDashboard,
   IconLayoutKanban,
   IconLayoutSidebar,
@@ -84,7 +85,9 @@ import {
   IconUnderline,
   IconUpload,
   IconUser,
+  IconUserCheck,
   IconUserCircle,
+  IconUserCog,
   IconUserEdit,
   IconUserX,
   IconUsers,
@@ -233,11 +236,17 @@ export const Icons = {
   galleryVerticalEnd: IconStack2,
   moreHorizontal: IconDots,
 
-  // Robotics Club — feature icons
+  // Robotics Club feature icons
   robot: IconRobot,
   cpu: IconCpu,
   arrowsExchange: IconArrowsExchange,
   chartBar: IconChartBar,
   shieldLock: IconShieldLock,
-  clockX: IconClockX
+  clockX: IconClockX,
+
+  // User management
+  keyRound: IconKey,
+  userCog: IconUserCog,
+  userCheck: IconUserCheck,
+  userX: IconUserX
 };

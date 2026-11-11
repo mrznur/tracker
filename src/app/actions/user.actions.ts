@@ -4,10 +4,10 @@ import { z } from 'zod';
 import {
   createUser,
   deactivateUser,
+  activateUser,
   resetPassword,
   changeRole
 } from '@/server/services/user.service';
-import { prisma } from '@/server/db';
 import { auth } from '@/server/auth';
 
 const CreateUserSchema = z.object({
@@ -66,11 +66,7 @@ export async function activateUserAction(id: string): Promise<ActionResult<objec
   }
 
   try {
-    const data = await prisma.user.update({
-      where: { id },
-      data: { isActive: true },
-      select: { id: true, name: true, email: true, role: true, isActive: true, createdAt: true }
-    });
+    const data = await activateUser(id);
     return { success: true, data };
   } catch (err) {
     return { success: false, error: err instanceof Error ? err.message : 'Unknown error' };
@@ -111,7 +107,7 @@ export async function changeRoleAction(
     return { success: false, error: parsed.error.issues.map((e) => e.message).join(', ') };
   }
   try {
-    const data = await changeRole(id, parsed.data);
+    const data = await changeRole(id, parsed.data.role);
     return { success: true, data };
   } catch (err) {
     return { success: false, error: err instanceof Error ? err.message : 'Unknown error' };

@@ -42,7 +42,7 @@ export default async function ReportsPage({ searchParams }: PageProps) {
       <ReportsTabs
         tab={tab}
         borrowed={borrowed as Parameters<typeof ReportsTabs>[0]['borrowed']}
-        overdue={overdue as Parameters<typeof ReportsTabs>[0]['overdue']}
+        overdue={overdue as unknown as Parameters<typeof ReportsTabs>[0]['overdue']}
         lostDamaged={lostDamaged as Parameters<typeof ReportsTabs>[0]['lostDamaged']}
         mostBorrowed={mostBorrowed as Parameters<typeof ReportsTabs>[0]['mostBorrowed']}
         loansByMember={loansByMember.items as Parameters<typeof ReportsTabs>[0]['loansByMember']}

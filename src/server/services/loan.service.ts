@@ -11,14 +11,7 @@ export type LoanListParams = {
   tab?: 'active' | 'overdue' | 'returned' | 'all';
 };
 
-export type LoanListResult = {
-  items: object[];
-  total: number;
-  page: number;
-  pageSize: number;
-};
-
-export async function getLoanList(params: LoanListParams = {}): Promise<LoanListResult> {
+export async function getLoanList(params: LoanListParams = {}) {
   const page = Math.max(1, params.page ?? 1);
   const pageSize = Math.min(100, Math.max(1, params.pageSize ?? 20));
   const skip = (page - 1) * pageSize;

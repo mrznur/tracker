@@ -100,9 +100,9 @@ export function EquipmentForm({
             <SelectValue placeholder='Select category' />
           </SelectTrigger>
           <SelectContent>
-            {categories.map((cat) => (
-              <SelectItem key={cat.id} value={cat.id}>
-                {cat.name}
+            {categories.map((category) => (
+              <SelectItem key={category.id} value={category.id}>
+                {category.name}
               </SelectItem>
             ))}
           </SelectContent>

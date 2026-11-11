@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { KeyRound, UserCog, UserCheck, UserX } from 'lucide-react';
+import { Icons } from '@/components/icons';
 import {
   Table,
   TableBody,
@@ -16,7 +16,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { LoadingButton } from '@/components/ui/loading-button';
 import { RoleBadge, MemberStatusBadge } from '@/components/ui/status-badge';
-import { Icons } from '@/components/icons';
 import {
   Dialog,
   DialogContent,
@@ -188,7 +187,7 @@ export function UsersTable({ users }: UsersTableProps) {
                           setRoleError(null);
                         }}
                       >
-                        <UserCog className='size-3.5' />
+                        <Icons.userCog className='size-3.5' />
                         Role
                       </Button>
                       <Button
@@ -200,7 +199,7 @@ export function UsersTable({ users }: UsersTableProps) {
                           setResetDone(false);
                         }}
                       >
-                        <KeyRound className='size-3.5' />
+                        <Icons.keyRound className='size-3.5' />
                         Reset PW
                       </Button>
                       <Button
@@ -215,9 +214,9 @@ export function UsersTable({ users }: UsersTableProps) {
                         }
                       >
                         {user.isActive ? (
-                          <UserX className='size-3.5' />
+                          <Icons.userX className='size-3.5' />
                         ) : (
-                          <UserCheck className='size-3.5' />
+                          <Icons.userCheck className='size-3.5' />
                         )}
                         {user.isActive ? 'Deactivate' : 'Activate'}
                       </Button>
